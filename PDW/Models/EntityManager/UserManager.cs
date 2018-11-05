@@ -1,7 +1,7 @@
 ﻿using PDW.Models.DB;
 using PDW.Models.ViewModel;
 using System;
-using System.Collections.Generic;
+using System.Collections.Generic; //contem interfaces e classes que definem colecoes genericas
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -66,6 +66,7 @@ namespace PDW.Models.EntityManager
             }
         }
 
+        //verifica a password
         public string GetUserPassword(string loginName)
         {
             using(DemoDBEntities db = new DemoDBEntities())
@@ -82,6 +83,48 @@ namespace PDW.Models.EntityManager
                 
             }
         }
+
+        //verificar se o utilizador tem um determinado role
+        public bool IsUserInRole(string loginName, string roleName)
+        {
+            using(DemoDBEntities db = new DemoDBEntities())
+            {
+                SYSUser SU = db.SYSUsers.Where(o => o.LoginName.ToLower().Equals(loginName))?.FirstOrDefault();
+                if (SU != null)
+                {
+                    var roles = from q in db.SYSUserRoles
+                                join r in db.LOOKUPRoles on q.LOOKUPRoleID equals r.LOOKUPRoleID
+                                where r.RoleName.Equals(roleName) && q.SYSUserID.Equals(SU.SYSUserID)
+                                select r.RoleName;
+                    if (roles != null)
+                    {
+                        return roles.Any();
+                    }
+                }
+                return false;
+            }
+        }
+
+        public List<LOOKUPAvailableRole> GetAllRoles()
+        {
+            using (DemoDBEntities db = new DemoDBEntities())
+            {
+                var roles = db.LOOKUPRoles.Select(o => new LOOKUPAvailableRole
+                {
+                    LOOKUPRoleID = o.LOOKUPRoleID,
+                    RoleName = o.RoleName,
+                    RoleDescription = o.RoleDescription
+                }).ToList();
+
+                return roles;
+            }
+        }
+        /*
+        public List<UserProfileView> GetAllUserProfiles()
+        {
+
+        }
+        */
 
         public static implicit operator ModelState(UserManager v)
         {

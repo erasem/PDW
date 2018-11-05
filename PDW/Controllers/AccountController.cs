@@ -6,6 +6,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using PDW.Models.EntityManager;
+using PDW.Security;
 
 namespace PDW.Controllers
 {
@@ -33,8 +34,6 @@ namespace PDW.Controllers
                 else
                 {
                     ModelState.AddModelError("", "Login Name already taken.");
-                    return RedirectToAction("Error", "Home");
-
                 }
 
             }
@@ -85,6 +84,7 @@ namespace PDW.Controllers
 
     }
 
+    //controlador de redirect
     public class HomeController : Controller
     {
         //default redirect
@@ -99,8 +99,14 @@ namespace PDW.Controllers
         {
             return View();
         }
+        //To support multiple role access, just add another role name by separating it with comma for example [AuthorizeRoles(“Admin”,”Manager”)]. 
+        [AuthorizeRoles("Admin")]
+        public ActionResult AdminOnly()
+        {
+            return View();
+        }
 
-        public ActionResult Error()
+        public ActionResult UnAuthorized()
         {
             return View();
         }
