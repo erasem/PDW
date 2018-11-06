@@ -8,6 +8,8 @@ using System.Web.Mvc;
 using PDW.Models.EntityManager;
 using PDW.Security;
 
+
+
 namespace PDW.Controllers
 {
     public class AccountController : Controller
@@ -103,6 +105,21 @@ namespace PDW.Controllers
         [AuthorizeRoles("Admin")]
         public ActionResult AdminOnly()
         {
+            return View();
+        }
+
+        //apenas admins podem invocar este metodo, chamao GetUserDataView passando o loginName e retorna o resultado na PartialView
+        [AuthorizeRoles("Admin")]
+        public ActionResult ManageUserPartial()
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                string loginName = User.Identity.Name;
+                UserManager UM = new UserManager();
+                UserDataView UDV = UM.GetUserDataView(loginName);
+                return PartialView(UDV);
+            }
+
             return View();
         }
 

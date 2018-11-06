@@ -105,6 +105,7 @@ namespace PDW.Models.EntityManager
             }
         }
 
+        //ir buscar todos os roles
         public List<LOOKUPAvailableRole> GetAllRoles()
         {
             using (DemoDBEntities db = new DemoDBEntities())
@@ -119,12 +120,79 @@ namespace PDW.Models.EntityManager
                 return roles;
             }
         }
-        /*
+
+        //buscar o id utilizador
+        public int GetUserID(string loginName)
+        {
+            using (DemoDBEntities db = new DemoDBEntities()) {
+                var user = db.SYSUsers.Where(o => o.LoginName.Equals(loginName));
+                if (user.Any()) return user.FirstOrDefault().SYSUserID;
+            }
+            return 0;
+        }
+
+        //ir buscar todos os perfis de utilizador
         public List<UserProfileView> GetAllUserProfiles()
         {
+            List<UserProfileView> profiles = new List<UserProfileView>();
+            using (DemoDBEntities db = new DemoDBEntities())
+            {
+                UserProfileView UPV; var users = db.SYSUsers.ToList();
 
+                foreach (SYSUser u in db.SYSUsers)
+                {
+                    UPV = new UserProfileView();
+                    UPV.SYSUserID = u.SYSUserID;
+                    UPV.LoginName = u.LoginName;
+                    UPV.Password = u.PasswordEncryptedText;
+
+                    var SUP = db.SYSUserProfiles.Find(u.SYSUserID);
+                    if (SUP != null) { UPV.FirstName = SUP.FirstName;
+                        UPV.LastName = SUP.LastName;
+                        UPV.Gender = SUP.Gender;
+                    }
+
+                    var SUR = db.SYSUserRoles.Where(o => o.SYSUserID.Equals(u.SYSUserID));
+                    if (SUR.Any()) { var userRole = SUR.FirstOrDefault();
+                        UPV.LOOKUPRoleID = userRole.LOOKUPRoleID;
+                        UPV.RoleName = userRole.LOOKUPRole.RoleName;
+                        UPV.IsRoleActive = userRole.IsActive;
+                    }
+
+                    profiles.Add(UPV);
+                }
+            }
+
+            return profiles;
         }
-        */
+
+        //vai buscar todos os perfis e roles de todos os utilizadores
+        public UserDataView GetUserDataView(string loginName)
+        {
+            UserDataView UDV = new UserDataView();
+            List<UserProfileView> profiles = GetAllUserProfiles();
+            List<LOOKUPAvailableRole> roles = GetAllRoles();
+
+            int? userAssignedRoleID = 0, userID = 0;
+            string userGender = string.Empty;
+
+            userID = GetUserID(loginName);
+            using (DemoDBEntities db = new DemoDBEntities())
+            {
+                userAssignedRoleID = db.SYSUserRoles.Where(o => o.SYSUserID == userID)?.FirstOrDefault().LOOKUPRoleID;
+                userGender = db.SYSUserProfiles.Where(o => o.SYSUserID == userID)?.FirstOrDefault().Gender;
+            }
+
+            List<Gender> genders = new List<Gender>();
+            genders.Add(new Gender { Text = "Male", Value = "M" });
+            genders.Add(new Gender { Text = "Female", Value = "F" });
+
+            UDV.UserProfile = profiles;
+            UDV.UserRoles = new UserRoles { SelectedRoleID = userAssignedRoleID, UserRoleList = roles };
+            UDV.UserGender = new UserGender { SelectedGender = userGender, Gender = genders };
+
+            return UDV;
+        }
 
         public static implicit operator ModelState(UserManager v)
         {
@@ -132,5 +200,3 @@ namespace PDW.Models.EntityManager
         }
     }
 }
-
-//teste
