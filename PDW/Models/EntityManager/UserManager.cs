@@ -110,8 +110,7 @@ namespace PDW.Models.EntityManager
         {
             using (DemoDBEntities db = new DemoDBEntities())
             {
-                var roles = db.LOOKUPRoles.Select(o => new LOOKUPAvailableRole
-                {
+                var roles = db.LOOKUPRoles.Select(o => new LOOKUPAvailableRole {
                     LOOKUPRoleID = o.LOOKUPRoleID,
                     RoleName = o.RoleName,
                     RoleDescription = o.RoleDescription
@@ -124,9 +123,11 @@ namespace PDW.Models.EntityManager
         //buscar o id utilizador
         public int GetUserID(string loginName)
         {
-            using (DemoDBEntities db = new DemoDBEntities()) {
+            using (DemoDBEntities db = new DemoDBEntities())
+            {
                 var user = db.SYSUsers.Where(o => o.LoginName.Equals(loginName));
-                if (user.Any()) return user.FirstOrDefault().SYSUserID;
+                if (user.Any())
+                    return user.FirstOrDefault().SYSUserID;
             }
             return 0;
         }
@@ -137,7 +138,8 @@ namespace PDW.Models.EntityManager
             List<UserProfileView> profiles = new List<UserProfileView>();
             using (DemoDBEntities db = new DemoDBEntities())
             {
-                UserProfileView UPV; var users = db.SYSUsers.ToList();
+                UserProfileView UPV;
+                var users = db.SYSUsers.ToList();
 
                 foreach (SYSUser u in db.SYSUsers)
                 {
@@ -147,13 +149,17 @@ namespace PDW.Models.EntityManager
                     UPV.Password = u.PasswordEncryptedText;
 
                     var SUP = db.SYSUserProfiles.Find(u.SYSUserID);
-                    if (SUP != null) { UPV.FirstName = SUP.FirstName;
+                    if (SUP != null)
+                    {
+                        UPV.FirstName = SUP.FirstName;
                         UPV.LastName = SUP.LastName;
                         UPV.Gender = SUP.Gender;
                     }
 
                     var SUR = db.SYSUserRoles.Where(o => o.SYSUserID.Equals(u.SYSUserID));
-                    if (SUR.Any()) { var userRole = SUR.FirstOrDefault();
+                    if (SUR.Any())
+                    {
+                        var userRole = SUR.FirstOrDefault();
                         UPV.LOOKUPRoleID = userRole.LOOKUPRoleID;
                         UPV.RoleName = userRole.LOOKUPRole.RoleName;
                         UPV.IsRoleActive = userRole.IsActive;
@@ -178,7 +184,7 @@ namespace PDW.Models.EntityManager
 
             userID = GetUserID(loginName);
             using (DemoDBEntities db = new DemoDBEntities())
-            {
+            { 
                 userAssignedRoleID = db.SYSUserRoles.Where(o => o.SYSUserID == userID)?.FirstOrDefault().LOOKUPRoleID;
                 userGender = db.SYSUserProfiles.Where(o => o.SYSUserID == userID)?.FirstOrDefault().Gender;
             }
@@ -190,12 +196,13 @@ namespace PDW.Models.EntityManager
             UDV.UserProfile = profiles;
             UDV.UserRoles = new UserRoles { SelectedRoleID = userAssignedRoleID, UserRoleList = roles };
             UDV.UserGender = new UserGender { SelectedGender = userGender, Gender = genders };
-
             return UDV;
         }
 
+
         public void UpdateUserAccount(UserProfileView user)
         {
+
             using (DemoDBEntities db = new DemoDBEntities())
             {
                 using (var dbContextTransaction = db.Database.BeginTransaction())
@@ -212,7 +219,8 @@ namespace PDW.Models.EntityManager
 
                         db.SaveChanges();
 
-                        var userProfile = db.SYSUserProfiles.Where(o => o.SYSUserID == user.SYSUserID); if (userProfile.Any())
+                        var userProfile = db.SYSUserProfiles.Where(o => o.SYSUserID == user.SYSUserID);
+                        if (userProfile.Any())
                         {
                             SYSUserProfile SUP = userProfile.FirstOrDefault();
                             SUP.SYSUserID = SU.SYSUserID;
@@ -229,23 +237,45 @@ namespace PDW.Models.EntityManager
 
                         if (user.LOOKUPRoleID > 0)
                         {
-                            var userRole = db.SYSUserRoles.Where(o => o.SYSUserID == user.SYSUserID); SYSUserRole SUR = null; if (userRole.Any())
+                            var userRole = db.SYSUserRoles.Where(o => o.SYSUserID == user.SYSUserID);
+                            SYSUserRole SUR = null;
+                            if (userRole.Any())
                             {
-                                SUR = userRole.FirstOrDefault(); SUR.LOOKUPRoleID = user.LOOKUPRoleID; 
-    
-                        SUR.SYSUserID = user.SYSUserID; SUR.IsActive = true; SUR.RowCreatedSYSUserID = user.SYSUserID; SUR.RowModifiedSYSUserID = user.SYSUserID; SUR.RowCreatedDateTime = DateTime.Now; SUR.RowModifiedDateTime = DateTime.Now;
+                                SUR = userRole.FirstOrDefault(); SUR.LOOKUPRoleID = user.LOOKUPRoleID;
+                                SUR.SYSUserID = user.SYSUserID;
+                                SUR.IsActive = true;
+                                SUR.RowCreatedSYSUserID = user.SYSUserID;
+                                SUR.RowModifiedSYSUserID = user.SYSUserID;
+                                SUR.RowCreatedDateTime = DateTime.Now;
+                                SUR.RowModifiedDateTime = DateTime.Now;
                             }
-                            else { SUR = new SYSUserRole(); SUR.LOOKUPRoleID = user.LOOKUPRoleID; SUR.SYSUserID = user.SYSUserID; SUR.IsActive = true; SUR.RowCreatedSYSUserID = user.SYSUserID; SUR.RowModifiedSYSUserID = user.SYSUserID; SUR.RowCreatedDateTime = DateTime.Now; SUR.RowModifiedDateTime = DateTime.Now; db.SYSUserRoles.Add(SUR); }
+                            else
+                            {
+                                SUR = new SYSUserRole();
+                                SUR.LOOKUPRoleID = user.LOOKUPRoleID;
+                                SUR.SYSUserID = user.SYSUserID;
+                                SUR.IsActive = true;
+                                SUR.RowCreatedSYSUserID = user.SYSUserID;
+                                SUR.RowModifiedSYSUserID = user.SYSUserID;
+                                SUR.RowCreatedDateTime = DateTime.Now;
+                                SUR.RowModifiedDateTime = DateTime.Now;
+                                db.SYSUserRoles.Add(SUR);
+                            }
 
                             db.SaveChanges();
                         }
                         dbContextTransaction.Commit();
                     }
-                    catch { dbContextTransaction.Rollback(); }
+                    catch
+                    {
+                        dbContextTransaction.Rollback();
+                    }
                 }
             }
         }
-        
+
+  
+
         public static implicit operator ModelState(UserManager v)
         {
             throw new NotImplementedException();

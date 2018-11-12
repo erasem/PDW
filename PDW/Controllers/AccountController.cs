@@ -110,22 +110,52 @@ namespace PDW.Controllers
 
         //apenas admins podem invocar este metodo, chamao GetUserDataView passando o loginName e retorna o resultado na PartialView
         [AuthorizeRoles("Admin")]
-        public ActionResult ManageUserPartial()
+        public ActionResult ManageUserPartial(string status = "")
         {
             if (User.Identity.IsAuthenticated)
             {
                 string loginName = User.Identity.Name;
                 UserManager UM = new UserManager();
                 UserDataView UDV = UM.GetUserDataView(loginName);
+
+                string message = string.Empty;
+                if (status.Equals("update"))
+                    message = "Update Successful";
+                else if (status.Equals("delete"))
+                    message = "Delete Successful";
+
+                ViewBag.Message = message;
+
                 return PartialView(UDV);
             }
 
-            return View();
+            return RedirectToAction("Index", "Home");
+        }
+
+        //coleciona informacao enviada da view para dar update 
+        [AuthorizeRoles("Admin")]
+        public ActionResult UpdateUserData(int userID, string loginName, string password, string firstName, string lastName, string gender, int roleID = 0)
+        {
+            UserProfileView UPV = new UserProfileView();
+            UPV.SYSUserID = userID;
+            UPV.LoginName = loginName;
+            UPV.Password = password;
+            UPV.FirstName = firstName;
+            UPV.LastName = lastName;
+            UPV.Gender = gender;
+
+            if (roleID > 0)
+                UPV.LOOKUPRoleID = roleID;
+
+            UserManager UM = new UserManager();
+            UM.UpdateUserAccount(UPV);
+
+            return Json(new { success = true });
         }
 
         public ActionResult UnAuthorized()
         {
             return View();
-        }//carlos a culpa e do ruia
+        }
     }
 }

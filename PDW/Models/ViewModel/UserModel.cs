@@ -45,10 +45,11 @@ namespace PDW.Models.ViewModel
         [Display(Name = "Password")]
         public string Password { get; set; }
     }
-    
+
     // campos para mostrar os utilizadores da base de dados
     public class UserProfileView
     {
+        [Key]
         public int SYSUserID { get; set; }
         public int LOOKUPRoleID { get; set; }
         public string RoleName { get; set; }
@@ -100,7 +101,6 @@ namespace PDW.Models.ViewModel
         public UserRoles UserRoles { get; set; }
         public UserGender UserGender { get; set; }
     }
-
-
+    
 
 }
