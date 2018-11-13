@@ -134,4 +134,24 @@
         });
     });
 
+    function DeleteUser(id) {
+        $.ajax({
+            type: "POST",
+            url: "@(Url.Action("DeleteUser","Home"))",
+            data: { userID: id },
+            success: function (data) { $("#divUserListContainer").load("@(Url.Action("ManageUserPartial","Home", new { status
+                                                                        ="delete" }))"); }, error: function (error) { }
+        });
+
+        }
+
+    $("a.lnkDelete").on("click", function () {
+        var row = $(this).closest('tr');
+        var id = row.find("td:eq(0)").html().trim();
+        var answer = confirm("You are about to delete this user with ID " + id + " . Continue?");
+        if (answer)
+            DeleteUser(id);
+        return false;
+    });
+
 </script> 

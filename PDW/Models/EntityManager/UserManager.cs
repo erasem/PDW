@@ -199,7 +199,6 @@ namespace PDW.Models.EntityManager
             return UDV;
         }
 
-
         public void UpdateUserAccount(UserProfileView user)
         {
 
@@ -274,7 +273,44 @@ namespace PDW.Models.EntityManager
             }
         }
 
-  
+        public void DeleteUser(int userID)
+        {
+            using (DemoDBEntities db = new DemoDBEntities())
+            {
+                using (var dbContextTransaction = db.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        var SUR = db.SYSUserRoles.Where(o => o.SYSUserID == userID);
+                        if (SUR.Any())
+                        {
+                            db.SYSUserRoles.Remove(SUR.FirstOrDefault());
+                            db.SaveChanges();
+                        }
+
+                        var SUP = db.SYSUserProfiles.Where(o => o.SYSUserID == userID);
+                        if (SUP.Any())
+                        {
+                            db.SYSUserProfiles.Remove(SUP.FirstOrDefault());
+                            db.SaveChanges();
+                        }
+
+                        var SU = db.SYSUsers.Where(o => o.SYSUserID == userID);
+                        if (SU.Any())
+                        {
+                            db.SYSUsers.Remove(SU.FirstOrDefault());
+                            db.SaveChanges();
+                        }
+
+                        dbContextTransaction.Commit();
+                    }
+                    catch
+                    {
+                        dbContextTransaction.Rollback();
+                    }
+                }
+            }
+        }
 
         public static implicit operator ModelState(UserManager v)
         {

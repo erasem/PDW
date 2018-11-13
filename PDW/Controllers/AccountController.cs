@@ -153,6 +153,15 @@ namespace PDW.Controllers
             return Json(new { success = true });
         }
 
+        //DELETE USER
+        [AuthorizeRoles("Admin")]
+        public ActionResult DeleteUser(int userID)
+        {
+            UserManager UM = new UserManager();
+            UM.DeleteUser(userID);
+            return Json(new { success = true });
+        }
+
         public ActionResult UnAuthorized()
         {
             return View();
